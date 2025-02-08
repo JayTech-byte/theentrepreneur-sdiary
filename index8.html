@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Entrepreneur's Diary - Divine Dashboard</title>
+  <!-- Google Fonts for a modern, catchy look -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ---------- CSS VARIABLES FOR CONSISTENCY ---------- */
+    :root {
+      --primary-color: #fdd835;
+      --primary-hover: #ffeb3b;
+      --secondary-color: #212121;
+      --bg-overlay: rgba(25,25,25,0.9);
+      --bg-overlay-blur: blur(15px);
+      --text-color: #e0e0e0;
+      --accent-color: #a5d6a7;
+      --error-color: #ff5252;
+      --font-base: 'Montserrat', sans-serif;
+      --font-mission: 'Playfair Display', serif;
+    }
+    /* ---------- RESET & BASE STYLES ---------- */
+    *, *::before, *::after {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+    body {
+      font-family: var(--font-base);
+      overflow-x: hidden;
+      background: url("file:///C:/Users/Hp/Downloads/DALL·E%202025-02-06%2009.03.40%20-%20A%20split-scene%20image%20of%20an%20entrepreneur%27s%20transformation.%20On%20the%20left,%20a%20frustrated%20entrepreneur%20sitting%20at%20a%20cluttered%20desk,%20overwhelmed%20with%20financia.webp") no-repeat center center fixed;
+      background-size: cover;
+      color: var(--text-color);
+      min-height: 100vh;
+      position: relative;
+      padding-top: 70px; /* for fixed nav */
+    }
+    /* ---------- PARTICLE BACKGROUND ---------- */
+    #particle-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -2;
+    }
+    /* ---------- CONTAINER (Card Style) ---------- */
+    .container {
+      background: var(--bg-overlay);
+      backdrop-filter: var(--bg-overlay-blur);
+      border-radius: 16px;
+      box-shadow: 0 0 40px rgba(0,0,0,0.6);
+      width: 95%; max-width: 1000px;
+      margin: 20px auto;
+      padding: 30px 40px;
+      animation: fadeIn 0.8s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* ---------- NAVIGATION HEADER ---------- */
+    header {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      background: rgba(20,20,20,0.9);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      padding: 12px 0;
+    }
+    nav ul li {
+      margin: 0 20px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      transition: color 0.3s ease;
+    }
+    nav ul li:hover {
+      color: var(--primary-hover);
+    }
+    /* ---------- HEADINGS & TEXT ---------- */
+    h2 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+      color: var(--primary-color);
+      text-transform: uppercase;
+    }
+    p {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      color: #ddd;
+    }
+    /* ---------- BUTTONS ---------- */
+    button {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--primary-color);
+      color: var(--secondary-color);
+      cursor: pointer;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      font-size: 1.1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+      margin: 10px 5px;
+    }
+    button:hover {
+      background-color: var(--primary-hover);
+      transform: scale(1.05);
+    }
+    span {
+      cursor: pointer;
+      text-decoration: underline;
+      color: #bbdefb;
+      transition: color 0.2s ease;
+    }
+    span:hover { color: #e3f2fd; }
+    .feedback {
+      margin-top: 15px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .feedback.error { color: var(--error-color); animation: shake 0.6s ease; }
+    .feedback.success { color: var(--accent-color); }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+      20%, 40%, 60%, 80% { transform: translateX(8px); }
+    }
+    /* ---------- FORM WRAPPER ---------- */
+    .form-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      width: 100%; max-width: 500px;
+      margin: 0 auto;
+    }
+    input {
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      width: calc(100% - 28px);
+      background: rgba(255,255,255,0.95);
+      color: #333;
+      font-size: 1.1rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.2);
+    }
+    input:focus {
+      transform: scale(1.02);
+      box-shadow: 0 0 12px rgba(0,0,0,0.3);
+    }
+    input[type="file"] {
+      background: rgba(255,255,255,0.1);
+      cursor: pointer;
+    }
+    /* ---------- TABLE STYLES ---------- */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #444;
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+    }
+    th {
+      background: linear-gradient(135deg, #333, #555);
+      color: var(--text-color);
+    }
+    tr:nth-child(even) { background-color: rgba(255,255,255,0.05); }
+    tr:hover { background-color: rgba(255,255,255,0.1); }
+    /* ---------- DISPLAY AREAS ---------- */
+    #profit-display, #sales-display {
+      margin-top: 15px;
+      font-size: 1.3rem;
+      color: var(--accent-color);
+    }
+    /* ---------- MISSION & WELCOME STYLING ---------- */
+    .mission-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo {
+      width: 150px;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      margin-bottom: 10px;
+    }
+    .mission {
+      font-family: var(--font-mission);
+      font-size: 1.4rem;
+      color: var(--accent-color);
+    }
+    .welcome-message {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 15px;
+    }
+    /* ---------- SECTION VISIBILITY ---------- */
+    .hidden { display: none !important; }
+    /* ---------- RESPONSIVE LAYOUT ---------- */
+    @media (max-width: 768px) {
+      nav ul { flex-direction: column; align-items: center; }
+      nav ul li { margin: 10px 0; }
+    }
+  </style>
+</head>
+<body>
+  <!-- PARTICLE BACKGROUND CANVAS -->
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- FIXED NAVIGATION HEADER (Shown After Login) -->
+  <header id="dashboard-nav" class="hidden">
+    <nav>
+      <ul>
+        <li onclick="showDashboardHome()">Dashboard</li>
+        <li onclick="showInventory()">Inventory</li>
+        <li onclick="showInventoryHistory()">Inventory History</li>
+        <li onclick="showSales()">Sales</li>
+        <li onclick="showSalesHistory()">Sales History</li>
+        <li onclick="logout()">Logout</li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <div class="container">
+    <!-- AUTHENTICATION SECTIONS -->
+    <section id="welcome-section">
+      <h2>Welcome to The Entrepreneur's Diary</h2>
+      <p class="welcome-message">Where Salesmanship Meets Storytelling – stirring emotion and igniting the fire of entrepreneurship.</p>
+      <div class="form-wrapper">
+        <button onclick="showSignupForm()">Sign Up</button>
+        <button onclick="showLoginForm()">Log In</button>
+      </div>
+    </section>
+
+    <!-- SIGNUP SECTION -->
+    <section id="signup-section" class="hidden">
+      <div class="form-wrapper">
+        <h2>Create Your Account</h2>
+        <input type="text" placeholder="Full Name" id="signup-name">
+        <input type="email" placeholder="Email Address" id="signup-email">
+        <input type="file" id="profile-picture" accept="image/*">
+        <input type="password" placeholder="Create Password" id="signup-password">
+        <input type="password" placeholder="Confirm Password" id="signup-confirm-password">
+        <button onclick="handleCreateAccount()">Create Account</button>
+        <p class="feedback" id="signup-feedback"></p>
+        <p>Already have an account? <span onclick="showLoginForm()">Log In</span></p>
+      </div>
+    </section>
+
+    <!-- LOGIN SECTION -->
+    <section id="login-section" class="hidden">
+      <div class="form-wrapper">
+        <h2>Log In</h2>
+        <input type="text" placeholder="Full Name" id="login-name">
+        <input type="password" placeholder="Password" id="login-password">
+        <button onclick="handleLogin()">Log In</button>
+        <p class="feedback" id="login-feedback"></p>
+        <p>New user? <span onclick="showSignupForm()">Sign Up</span></p>
+      </div>
+    </section>
+
+    <!-- DASHBOARD SECTION (Shown After Authentication) -->
+    <section id="dashboard-section" class="hidden">
+      <!-- Dashboard Home with Mission Statement and Logo -->
+      <div id="dashboard-home">
+        <div class="mission-container">
+          <img src="file:///C:/Users/Hp/Downloads/DALL·E%202025-02-05%2018.49.58%20-%20A%20futuristic%20tech%20logo%20for%20'MessiahTechSolutionsInc.'%20featuring%20a%20golden%20halo%20symbolizing%20divine%20purpose,%20integrated%20with%20a%20sharp,%20modern%20tech%20emblem.png" alt="MessiahTechSolutionsInc Logo" class="logo">
+          <p class="mission">MessiahTechSolutionsInc. mission is to: revolutionize the tech landscape with divine innovation, empower entrepreneurs to transform dreams into reality, and build a legacy of excellence that transcends boundaries.</p>
+        </div>
+        <h2>Welcome, <span id="user-name"></span>!</h2>
+        <p>This is your divine dashboard. Use the navigation above to manage Inventory, Sales, and review complete history logs.</p>
+      </div>
+
+      <!-- INVENTORY MANAGEMENT SECTION -->
+      <section id="inventory-section" class="hidden">
+        <h2>Inventory Management</h2>
+        <div class="form-wrapper">
+          <input type="text" placeholder="Item Name" id="item-name">
+          <input type="number" placeholder="Cost Price (KSh)" id="item-cost">
+          <input type="number" placeholder="Selling Price (KSh)" id="item-price">
+          <input type="number" placeholder="Quantity" id="item-quantity">
+          <button onclick="addInventoryItem()">Add Inventory Item</button>
+        </div>
+        <div id="inventory-list">
+          <!-- Inventory table is dynamically generated here -->
+        </div>
+        <div id="profit-display">
+          <!-- Total inventory profit (KSh) is displayed here -->
+        </div>
+      </section>
+
+      <!-- INVENTORY HISTORY SECTION -->
+      <section id="inventory-history-section" class="hidden">
+        <h2>Inventory History</h2>
+        <div id="inventory-history-list">
+          <!-- A historical log of all inventory entries is shown here -->
+        </div>
+      </section>
+
+      <!-- SALES MANAGEMENT SECTION -->
+      <section id="sales-section" class="hidden">
+        <h2>Sales Management</h2>
+        <div class="form-wrapper">
+          <input type="text" placeholder="Item Name Sold" id="sale-item-name">
+          <input type="number" placeholder="Quantity Sold" id="sale-quantity">
+          <input type="number" placeholder="Sale Price per Unit (KSh)" id="sale-price">
+          <button onclick="addSaleTransaction()">Record Sale</button>
+        </div>
+        <div id="sales-list">
+          <!-- Sales transactions table is dynamically generated here -->
+        </div>
+        <div id="sales-display">
+          <!-- Total sales revenue and profit (KSh) is displayed here -->
+        </div>
+      </section>
+
+      <!-- SALES HISTORY SECTION -->
+      <section id="sales-history-section" class="hidden">
+        <h2>Sales History</h2>
+        <div id="sales-history-list">
+          <!-- A historical log of all sales transactions is shown here -->
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script>
+    /************************************************
+     * PARTICLE BACKGROUND ANIMATION
+     ************************************************/
+    const canvas = document.getElementById('particle-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const particlesArray = [];
+    const numberOfParticles = 150;
+    
+    class Particle {
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 2 + 0.5;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.speedY = Math.random() * 1 - 0.5;
+        this.opacity = Math.random() * 0.6 + 0.4;
+      }
+      draw() {
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        if(this.size > 0.1) this.size -= 0.01;
+        if(this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height || this.size <= 0.1) {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.size = Math.random() * 2 + 0.5;
+          this.speedX = Math.random() * 1 - 0.5;
+          this.speedY = Math.random() * 1 - 0.5;
+          this.opacity = Math.random() * 0.6 + 0.4;
+        }
+      }
+    }
+    
+    function initParticles() {
+      for (let i = 0; i < numberOfParticles; i++) {
+        particlesArray.push(new Particle());
+      }
+    }
+    initParticles();
+    
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particlesArray.forEach(particle => {
+        particle.update();
+        particle.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+    
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particlesArray.length = 0;
+      initParticles();
+    });
+    
+    /************************************************
+     * GLOBAL VARIABLES & NAVIGATION FUNCTIONS
+     ************************************************/
+    let currentUser = null;
+    let inventory = [];       // Current inventory items
+    let sales = [];           // Current sales transactions
+    let inventoryHistory = JSON.parse(localStorage.getItem("inventoryHistory")) || [];
+    let salesHistory = JSON.parse(localStorage.getItem("salesHistory")) || [];
+    
+    // Utility: Show a specific section while hiding others
+    function showSection(sectionId) {
+      const sections = ['welcome-section', 'signup-section', 'login-section', 'dashboard-section'];
+      sections.forEach(id => { document.getElementById(id).classList.add('hidden'); });
+      document.getElementById(sectionId).classList.remove('hidden');
+    }
+    
+    // Navigation for authentication
+    function showSignupForm() { showSection('signup-section'); }
+    function showLoginForm() { showSection('login-section'); }
+    
+    // After authentication, show the dashboard and fixed nav
+    function showDashboard(user) {
+      currentUser = user;
+      document.getElementById("user-name").innerText = user.name;
+      showSection('dashboard-section');
+      document.getElementById("dashboard-nav").classList.remove("hidden");
+      showDashboardHome();
+    }
+    
+    function showDashboardHome() {
+      document.getElementById("dashboard-home").classList.remove("hidden");
+      document.getElementById("inventory-section").classList.add("hidden");
+      document.getElementById("inventory-history-section").classList.add("hidden");
+      document.getElementById("sales-section").classList.add("hidden");
+      document.getElementById("sales-history-section").classList.add("hidden");
+    }
+    
+    function showInventory() {
+      document.getElementById("dashboard-home").classList.add("hidden");
+      document.getElementById("sales-section").classList.add("hidden");
+      document.getElementById("sales-history-section").classList.add("hidden");
+      document.getElementById("inventory-history-section").classList.add("hidden");
+      document.getElementById("inventory-section").classList.remove("hidden");
+      updateInventoryDisplay();
+    }
+    
+    function showInventoryHistory() {
+      document.getElementById("dashboard-home").classList.add("hidden");
+      document.getElementById("inventory-section").classList.add("hidden");
+      document.getElementById("sales-section").classList.add("hidden");
+      document.getElementById("sales-history-section").classList.add("hidden");
+      document.getElementById("inventory-history-section").classList.remove("hidden");
+      updateInventoryHistoryDisplay();
+    }
+    
+    function showSales() {
+      document.getElementById("dashboard-home").classList.add("hidden");
+      document.getElementById("inventory-section").classList.add("hidden");
+      document.getElementById("inventory-history-section").classList.add("hidden");
+      document.getElementById("sales-history-section").classList.add("hidden");
+      document.getElementById("sales-section").classList.remove("hidden");
+      updateSalesDisplay();
+    }
+    
+    function showSalesHistory() {
+      document.getElementById("dashboard-home").classList.add("hidden");
+      document.getElementById("inventory-section").classList.add("hidden");
+      document.getElementById("inventory-history-section").classList.add("hidden");
+      document.getElementById("sales-section").classList.add("hidden");
+      document.getElementById("sales-history-section").classList.remove("hidden");
+      updateSalesHistoryDisplay();
+    }
+    
+    /************************************************
+     * SIMULATED BACKEND FUNCTIONS
+     ************************************************/
+    const USERS_KEY = 'entrepreneursDiaryUsers';
+    
+    function simulateUserSignup(name, email, password, profilePicture) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const storedUsers = getStoredUsers();
+          if (storedUsers.find(user => user.email === email)) {
+            reject({ message: "Email already in use." });
+            return;
+          }
+          const newUser = { id: generateId(), name, email, password, profilePicture: profilePicture || null };
+          storedUsers.push(newUser);
+          localStorage.setItem(USERS_KEY, JSON.stringify(storedUsers));
+          resolve(newUser);
+        }, 1500);
+      });
+    }
+    
+    function simulateUserLogin(name, password) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const storedUsers = getStoredUsers();
+          const user = storedUsers.find(user => user.name === name && user.password === password);
+          if(user) resolve(user);
+          else reject({ message: "Invalid name or password." });
+        }, 1000);
+      });
+    }
+    
+    function getStoredUsers() {
+      const usersData = localStorage.getItem(USERS_KEY);
+      return usersData ? JSON.parse(usersData) : [];
+    }
+    
+    function generateId() {
+      return Math.random().toString(36).substr(2, 9);
+    }
+    
+    function showFeedback(element, message, type) {
+      element.innerText = message;
+      element.className = 'feedback ' + type;
+      setTimeout(() => {
+        element.style.opacity = 1;
+        element.style.transform = 'translateY(0)';
+      }, 3000);
+    }
+    
+    function isValidEmail(email) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); }
+    function isValidPassword(password) { return password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password); }
+    
+    /************************************************
+     * USER ACCOUNT HANDLING ACTIONS
+     ************************************************/
+    async function handleCreateAccount() {
+      const name = document.getElementById("signup-name").value.trim();
+      const email = document.getElementById("signup-email").value.trim();
+      const password = document.getElementById("signup-password").value;
+      const confirmPassword = document.getElementById("signup-confirm-password").value;
+      const profilePictureInput = document.getElementById('profile-picture');
+      const profilePictureFile = profilePictureInput.files && profilePictureInput.files[0];
+      const feedback = document.getElementById("signup-feedback");
+      
+      if (!name || !email || !password || !confirmPassword) {
+        showFeedback(feedback, "Please fill in all fields.", 'error');
+        return;
+      }
+      if (!isValidEmail(email)) {
+        showFeedback(feedback, "Enter a valid email address.", 'error');
+        return;
+      }
+      if (!isValidPassword(password)) {
+        showFeedback(feedback, "Password: 8+ chars, uppercase, number.", 'error');
+        return;
+      }
+      if (password !== confirmPassword) {
+        showFeedback(feedback, "Passwords do not match.", 'error');
+        return;
+      }
+      
+      let profilePictureBase64 = null;
+      if (profilePictureFile) { 
+        profilePictureBase64 = await toBase64(profilePictureFile);
+      }
+      
+      try {
+        const newUser = await simulateUserSignup(name, email, password, profilePictureBase64);
+        showFeedback(feedback, "Account created successfully!", 'success');
+        setTimeout(() => { showDashboard(newUser); }, 1500);
+      } catch (error) {
+        showFeedback(feedback, error.message || "Signup failed.", 'error');
+      }
+    }
+    
+    async function handleLogin() {
+      const name = document.getElementById("login-name").value.trim();
+      const password = document.getElementById("login-password").value;
+      const feedback = document.getElementById("login-feedback");
+      try {
+        const user = await simulateUserLogin(name, password);
+        showFeedback(feedback, "Login successful!", 'success');
+        setTimeout(() => { showDashboard(user); }, 1500);
+      } catch (error) {
+        showFeedback(feedback, error.message || "Login failed.", 'error');
+      }
+    }
+    
+    function logout() {
+      currentUser = null;
+      inventory = [];
+      sales = [];
+      updateInventoryDisplay();
+      updateSalesDisplay();
+      document.getElementById("dashboard-nav").classList.add("hidden");
+      showSection('welcome-section');
+    }
+    
+    function toBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
+    
+    /************************************************
+     * INVENTORY MANAGEMENT & HISTORY FUNCTIONS
+     ************************************************/
+    function addInventoryItem() {
+      const itemName = document.getElementById("item-name").value.trim();
+      const cost = parseFloat(document.getElementById("item-cost").value);
+      const price = parseFloat(document.getElementById("item-price").value);
+      const quantity = parseInt(document.getElementById("item-quantity").value);
+      
+      if (!itemName || isNaN(cost) || isNaN(price) || isNaN(quantity)) {
+        alert("Please fill in all inventory fields correctly.");
+        return;
+      }
+      
+      const newItem = { id: generateId(), itemName, cost, price, quantity };
+      inventory.push(newItem);
+      updateInventoryDisplay();
+      
+      // Log the entry in inventoryHistory with timestamp.
+      const timestamp = new Date().toLocaleString();
+      inventoryHistory.push({ ...newItem, timestamp });
+      localStorage.setItem("inventoryHistory", JSON.stringify(inventoryHistory));
+      
+      // Clear input fields.
+      document.getElementById("item-name").value = "";
+      document.getElementById("item-cost").value = "";
+      document.getElementById("item-price").value = "";
+      document.getElementById("item-quantity").value = "";
+    }
+    
+    function updateInventoryDisplay() {
+      const inventoryList = document.getElementById("inventory-list");
+      if (inventory.length === 0) {
+        inventoryList.innerHTML = "<p>No inventory items added yet.</p>";
+        document.getElementById("profit-display").innerHTML = "";
+        return;
+      }
+      let html = "<table><tr><th>Item Name</th><th>Cost Price (KSh)</th><th>Selling Price (KSh)</th><th>Quantity</th><th>Profit per Unit (KSh)</th><th>Total Profit (KSh)</th></tr>";
+      let totalProfit = 0;
+      inventory.forEach(item => {
+        const profitPerUnit = item.price - item.cost;
+        const totalItemProfit = profitPerUnit * item.quantity;
+        totalProfit += totalItemProfit;
+        html += `<tr>
+                   <td>${item.itemName}</td>
+                   <td>KSh ${item.cost.toFixed(2)}</td>
+                   <td>KSh ${item.price.toFixed(2)}</td>
+                   <td>${item.quantity}</td>
+                   <td>KSh ${profitPerUnit.toFixed(2)}</td>
+                   <td>KSh ${totalItemProfit.toFixed(2)}</td>
+                 </tr>`;
+      });
+      html += "</table>";
+      inventoryList.innerHTML = html;
+      document.getElementById("profit-display").innerHTML = `<h3>Total Inventory Profit: KSh ${totalProfit.toFixed(2)}</h3>`;
+    }
+    
+    function updateInventoryHistoryDisplay() {
+      const historyList = document.getElementById("inventory-history-list");
+      if (inventoryHistory.length === 0) {
+        historyList.innerHTML = "<p>No inventory history available.</p>";
+        return;
+      }
+      let html = "<table><tr><th>Item Name</th><th>Cost Price (KSh)</th><th>Selling Price (KSh)</th><th>Quantity</th><th>Profit per Unit (KSh)</th><th>Total Profit (KSh)</th><th>Timestamp</th></tr>";
+      inventoryHistory.forEach(item => {
+        const profitPerUnit = item.price - item.cost;
+        const totalItemProfit = profitPerUnit * item.quantity;
+        html += `<tr>
+                   <td>${item.itemName}</td>
+                   <td>KSh ${item.cost.toFixed(2)}</td>
+                   <td>KSh ${item.price.toFixed(2)}</td>
+                   <td>${item.quantity}</td>
+                   <td>KSh ${profitPerUnit.toFixed(2)}</td>
+                   <td>KSh ${totalItemProfit.toFixed(2)}</td>
+                   <td>${item.timestamp}</td>
+                 </tr>`;
+      });
+      html += "</table>";
+      historyList.innerHTML = html;
+    }
+    
+    /************************************************
+     * SALES MANAGEMENT & HISTORY FUNCTIONS
+     ************************************************/
+    function addSaleTransaction() {
+      const saleItemName = document.getElementById("sale-item-name").value.trim();
+      const saleQuantity = parseInt(document.getElementById("sale-quantity").value);
+      const salePrice = parseFloat(document.getElementById("sale-price").value);
+      
+      if (!saleItemName || isNaN(saleQuantity) || isNaN(salePrice)) {
+        alert("Please fill in all sales fields correctly.");
+        return;
+      }
+      
+      const newSale = { id: generateId(), saleItemName, saleQuantity, salePrice };
+      sales.push(newSale);
+      updateSalesDisplay();
+      
+      // Log the sale in salesHistory with timestamp.
+      const timestamp = new Date().toLocaleString();
+      salesHistory.push({ ...newSale, timestamp });
+      localStorage.setItem("salesHistory", JSON.stringify(salesHistory));
+      
+      // Clear input fields.
+      document.getElementById("sale-item-name").value = "";
+      document.getElementById("sale-quantity").value = "";
+      document.getElementById("sale-price").value = "";
+    }
+    
+    function updateSalesDisplay() {
+      const salesList = document.getElementById("sales-list");
+      if (sales.length === 0) {
+        salesList.innerHTML = "<p>No sales transactions recorded yet.</p>";
+        document.getElementById("sales-display").innerHTML = "";
+        return;
+      }
+      let html = "<table><tr><th>Item Sold</th><th>Quantity Sold</th><th>Sale Price per Unit (KSh)</th><th>Total Sale (KSh)</th><th>Profit (KSh)</th></tr>";
+      let totalSalesRevenue = 0;
+      let totalSalesProfit = 0;
+      sales.forEach(sale => {
+        const totalSale = sale.salePrice * sale.saleQuantity;
+        totalSalesRevenue += totalSale;
+        // Calculate profit using matching inventory cost if available.
+        const inventoryItem = inventory.find(item => item.itemName.toLowerCase() === sale.saleItemName.toLowerCase());
+        let profit = inventoryItem ? (sale.salePrice - inventoryItem.cost) * sale.saleQuantity : totalSale;
+        totalSalesProfit += profit;
+        html += `<tr>
+                   <td>${sale.saleItemName}</td>
+                   <td>${sale.saleQuantity}</td>
+                   <td>KSh ${sale.salePrice.toFixed(2)}</td>
+                   <td>KSh ${totalSale.toFixed(2)}</td>
+                   <td>KSh ${profit.toFixed(2)}</td>
+                 </tr>`;
+      });
+      html += "</table>";
+      salesList.innerHTML = html;
+      document.getElementById("sales-display").innerHTML = `<h3>Total Sales Revenue: KSh ${totalSalesRevenue.toFixed(2)}</h3>
+                                                           <h3>Total Sales Profit: KSh ${totalSalesProfit.toFixed(2)}</h3>`;
+    }
+    
+    function updateSalesHistoryDisplay() {
+      const historyList = document.getElementById("sales-history-list");
+      if (salesHistory.length === 0) {
+        historyList.innerHTML = "<p>No sales history available.</p>";
+        return;
+      }
+      let html = "<table><tr><th>Item Sold</th><th>Quantity Sold</th><th>Sale Price per Unit (KSh)</th><th>Total Sale (KSh)</th><th>Profit (KSh)</th><th>Timestamp</th></tr>";
+      salesHistory.forEach(sale => {
+        const totalSale = sale.salePrice * sale.saleQuantity;
+        const inventoryItem = inventory.find(item => item.itemName.toLowerCase() === sale.saleItemName.toLowerCase());
+        let profit = inventoryItem ? (sale.salePrice - inventoryItem.cost) * sale.saleQuantity : totalSale;
+        html += `<tr>
+                   <td>${sale.saleItemName}</td>
+                   <td>${sale.saleQuantity}</td>
+                   <td>KSh ${sale.salePrice.toFixed(2)}</td>
+                   <td>KSh ${totalSale.toFixed(2)}</td>
+                   <td>KSh ${profit.toFixed(2)}</td>
+                   <td>${sale.timestamp}</td>
+                 </tr>`;
+      });
+      html += "</table>";
+      historyList.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
